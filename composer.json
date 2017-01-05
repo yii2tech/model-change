@@ -1,0 +1,30 @@
+{
+    "name": "yii2tech/model-change",
+    "description": "Provides model data and state change tracking for Yii2",
+    "keywords": ["yii2", "active", "record", "model", "change", "dirty", "tracking"],
+    "type": "yii2-extension",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yii2tech/model-change/issues",
+        "forum": "http://www.yiiframework.com/forum/",
+        "wiki": "https://github.com/yii2tech/model-change/wiki",
+        "source": "https://github.com/yii2tech/model-change"
+    },
+    "authors": [
+        {
+            "name": "Paul Klimov",
+            "email": "klimov.paul@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": { "yii2tech\\modelchange\\": "" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
