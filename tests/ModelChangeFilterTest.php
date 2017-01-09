@@ -6,11 +6,11 @@ use Yii;
 use yii\base\Event;
 use yii\base\Action;
 use yii2tech\modelchange\ActionEvent;
-use yii2tech\modelchange\ModelChangeBehavior;
+use yii2tech\modelchange\ModelChangeFilter;
 use yii2tech\tests\unit\modelchange\data\Controller;
 use yii2tech\tests\unit\modelchange\data\Item;
 
-class ModelChangeBehaviorTest extends TestCase
+class ModelChangeFilterTest extends TestCase
 {
     protected function tearDown()
     {
@@ -31,7 +31,7 @@ class ModelChangeBehaviorTest extends TestCase
 
     public function testSetup()
     {
-        $behavior = new ModelChangeBehavior();
+        $behavior = new ModelChangeFilter();
 
         $modelClasses = [
             'app\models\Item',
@@ -46,7 +46,7 @@ class ModelChangeBehaviorTest extends TestCase
      */
     public function testAutoDetectModelClasses()
     {
-        $behavior = new ModelChangeBehavior();
+        $behavior = new ModelChangeFilter();
         $controller = $this->createController(['modelClass' => Item::className()]);
         $controller->attachBehavior('test', $behavior);
 
@@ -58,7 +58,7 @@ class ModelChangeBehaviorTest extends TestCase
      */
     public function testSetupModelEventHandlers()
     {
-        $behavior = new ModelChangeBehavior();
+        $behavior = new ModelChangeFilter();
         $controller = $this->createController();
         $controller->attachBehavior('test', $behavior);
         $action = new Action('test', $controller);
@@ -75,12 +75,12 @@ class ModelChangeBehaviorTest extends TestCase
      */
     public function testTriggerModelChangeEvent()
     {
-        $behavior = new ModelChangeBehavior();
+        $behavior = new ModelChangeFilter();
         $controller = $this->createController();
         $controller->attachBehavior('test', $behavior);
 
         $output = null;
-        $controller->on(ModelChangeBehavior::EVENT_AFTER_MODEL_CHANGE, function($event) use (&$output) {
+        $controller->on(ModelChangeFilter::EVENT_AFTER_MODEL_CHANGE, function($event) use (&$output) {
             $output = $event;
         });
 

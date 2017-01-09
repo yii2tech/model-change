@@ -25,7 +25,7 @@ use yii\db\BaseActiveRecord;
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-class ModelChangeBehavior extends Behavior
+class ModelChangeFilter extends Behavior
 {
     /**
      * @event ActionEvent an event raised right before model has been changed.
