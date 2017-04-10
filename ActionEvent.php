@@ -10,13 +10,24 @@ namespace yii2tech\modelchange;
 /**
  * ActionEvent represents the event triggered by controller action.
  *
+ * @property \yii\base\Model $model associated model instance.
+ *
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
 class ActionEvent extends \yii\base\ActionEvent
 {
     /**
-     * @var \yii\base\Model|null associated model instance.
+     * @var \yii\base\ModelEvent original model event.
      */
-    public $model;
+    public $modelEvent;
+
+
+    /**
+     * @return \yii\base\Model associated model instance.
+     */
+    public function getModel()
+    {
+        return $this->modelEvent->sender;
+    }
 }

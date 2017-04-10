@@ -1,5 +1,5 @@
-ActiveRecord Dynamic Attribute Extension for Yii2
-=================================================
+Model Change Tracking Extension for Yii2
+========================================
 
 This extension provides Yii2 model data and state change tracking.
 
