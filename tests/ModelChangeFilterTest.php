@@ -93,4 +93,28 @@ class ModelChangeFilterTest extends TestCase
         $this->assertTrue($output instanceof ActionEvent);
         $this->assertSame($model, $output->model);
     }
+
+    /**
+     * @depends testSetupModelEventHandlers
+     */
+    public function testModelChangeCallback()
+    {
+        $behavior = new ModelChangeFilter();
+        $controller = $this->createController();
+        $controller->attachBehavior('test', $behavior);
+
+        $output = null;
+        $behavior->afterModelChange = function($event) use (&$output) {
+            $output = $event;
+        };
+
+        $controller->beforeAction(new Action('test', $controller));
+
+        $model = new Item();
+        $model->name = 'some';
+        $model->save(false);
+
+        $this->assertTrue($output instanceof ActionEvent);
+        $this->assertSame($model, $output->model);
+    }
 }

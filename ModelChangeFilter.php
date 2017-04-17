@@ -7,14 +7,60 @@
 
 namespace yii2tech\modelchange;
 
-use yii\base\Behavior;
-use yii\base\Controller;
+use yii\base\ActionFilter;
 
 /**
- * ModelChangeBehavior provides ability of tracking the events of model state changes (e.g. save, delete etc.)
+ * ModelChangeFilter provides ability of tracking the events of model state changes (e.g. save, delete etc.)
  * during the controller action execution.
  *
- * This behavior should be attached to [[\yii\web\Controller]] instance.
+ * This filter can be attached to [[\yii\web\Controller]] or [[\yii\base\Module]] (including [[\yii\base\Application]]
+ * itself) instance.
+ *
+ * Controller configuration example:
+ *
+ * ```php
+ * class PageController extends \yii\web\Controller
+ * {
+ *     public $modelClass = 'app\models\Page'; // in case `modelClass` property exists, its value will be picked up automatically
+ *
+ *     public function behaviors()
+ *     {
+ *         return [
+ *             'modelChange' => [
+ *                 'class' => ModelChangeFilter::className(),
+ *                 'except' => [
+ *                     'index',
+ *                     'view'
+ *                 ],
+ *                 'afterModelChange' => function ($event) {
+ *                     Yii::$app->getSession()->set('cacheFlushRequired', true);
+ *                 },
+ *             ],
+ *         ];
+ *     }
+ *
+ *     // ...
+ * }
+ * ```
+ *
+ * Application configuration example:
+ *
+ * ```php
+ * return [
+ *     'as modelChange' => [
+ *         'class' => 'yii2tech\modelchange\ModelChangeFilter',
+ *         'modelClasses' => [
+ *             'app\models\Page',
+ *             'app\models\PageContent',
+ *             'app\models\MenuItem',
+ *         ],
+ *         'afterModelChange' => function ($event) {
+ *             Yii::$app->getSession()->set('cacheFlushRequired', true);
+ *         },
+ *     ],
+ *     // ...
+ * ];
+ * ```
  *
  * @see ModelChangeTrait
  *
@@ -23,7 +69,7 @@ use yii\base\Controller;
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-class ModelChangeFilter extends Behavior
+class ModelChangeFilter extends ActionFilter
 {
     use ModelChangeTrait;
     
@@ -32,6 +78,18 @@ class ModelChangeFilter extends Behavior
      * This event will be triggered in the owner controller scope.
      */
     const EVENT_AFTER_MODEL_CHANGE = 'afterModelChange';
+
+    /**
+     * @var callable|null a PHP callback, which should be executed after model has been changed.
+     * Callback should match the following signature:
+     *
+     * ```php
+     * function (\yii2tech\modelchange\ActionEvent $event) {}
+     * ```
+     *
+     * Note that you may use [[EVENT_AFTER_MODEL_CHANGE]] event for the same effect.
+     */
+    public $afterModelChange;
 
 
     /**
@@ -57,37 +115,28 @@ class ModelChangeFilter extends Behavior
      */
     protected function afterModelChange($event)
     {
-        $this->owner->trigger(self::EVENT_AFTER_MODEL_CHANGE, new ActionEvent($this->owner->action, ['modelEvent' => $event]));
+        $event = new ActionEvent($this->owner->action, ['modelEvent' => $event]);
+        if ($this->afterModelChange !== null) {
+            call_user_func($this->afterModelChange, $event);
+        }
+        $this->owner->trigger(self::EVENT_AFTER_MODEL_CHANGE, $event);
     }
-
-    // Events :
 
     /**
      * @inheritdoc
      */
-    public function events()
-    {
-        return [
-            Controller::EVENT_BEFORE_ACTION => 'beforeAction',
-            Controller::EVENT_AFTER_ACTION => 'afterAction',
-        ];
-    }
-
-    /**
-     * Handles [[Controller::EVENT_BEFORE_ACTION]] event, preparing model event listeners.
-     * @param \yii\base\ActionEvent $event event instance.
-     */
-    public function beforeAction($event)
+    public function beforeAction($action)
     {
         $this->attachModelEventListeners();
+        return parent::beforeAction($action);
     }
 
     /**
-     * Handles [[Controller::EVENT_AFTER_ACTION]] event, detaching model event listeners.
-     * @param \yii\base\ActionEvent $event event instance.
+     * @inheritdoc
      */
-    public function afterAction($event)
+    public function afterAction($action, $result)
     {
         $this->detachModelEventListeners();
+        return parent::afterAction($action, $result);
     }
 }
