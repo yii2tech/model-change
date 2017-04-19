@@ -97,6 +97,20 @@ will be set. This flag should be processed somewhere at administration page layo
 > Tip: in case there is `modelClass` property at the controller class, its value will be automatically picked up as
   [[\yii2tech\modelchange\ModelChangeFilter::$modelClasses]] value, so you can omit it.
 
+The last thing to do is clearing the session flag during the related controller action:
+
+```php
+class MaintenanceController extends \yii\web\Controller
+{
+    public function actionFlushCache()
+    {
+        Yii::$app->cache->flush();
+        Yii::$app->getSession()->remove('cacheFlushRequired');
+        return $this->redirect(['index']);
+    }
+}
+```
+
 You can also attach [[\yii2tech\modelchange\ModelChangeFilter]] to the module level or the entire application itself:
 
 ```php
@@ -194,8 +208,9 @@ class PageController extends \yii\web\Controller
 
     public function afterAction($action, $result)
     {
+        $result = parent::afterAction($action, $result);
         $this->detachModelEventListeners();
-        return parent::afterAction($action, $result);
+        return $result;
     }
 
     protected function afterModelChange($event)
